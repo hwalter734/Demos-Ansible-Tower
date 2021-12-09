@@ -1,0 +1,76 @@
+---
+# vars file for roles/azure-scaleset
+create:
+  name: "Bitbucket / Add users"
+  description: "Bitbucket / Add users"
+  job_type: "run"
+  playbook: "tower_main.yml"
+  survey_enabled: true
+  survey_spec:
+    name: Bitbucket survey 
+    description: Information for bitbucket user addition 
+    spec:
+      - type: text
+        question_name: Enter your admin username of your Bitbucket account 
+        question_description: Usually this is the workspace name followed by "-admin" 
+        variable: admin_username 
+        required: true
+        default:
+
+      - type: password
+        question_name: Enter your admin password of your Bitbucket account 
+        variable: admin_password 
+        required: true
+        default:
+
+      - type: text
+        question_name: Enter your repository name 
+        variable: repo_name 
+        required: true
+        default:
+
+      - type: text
+        question_name: Enter your workspace name 
+        variable: workspace 
+        required: true
+        default:
+
+      - type: text
+        question_name: Enter the desired permission for the users included within your csv or txt file
+        variable: permission 
+        required: true
+        default: write 
+        choices:
+          - write
+          - read
+
+      - type: text
+        question_name: Enter the csv or txt file containing the desired users 
+        variable: file  
+        required: true
+        default:
+
+      - type: text
+        question_name: Enter the delimiter used in your csv or txt file 
+        variable: delimiter 
+        required: true
+        default: ","
+
+inventory: 
+  name: "Bitbucket default inventory"
+  description: "Bitbucket default inventory"
+  organization: "Default"
+  copy_from: Default Inventory
+credential: 
+  name: "Bitbucket Credential"
+  description: "Local credentials"
+  organization: "Default"
+  credential_type: "ssh"
+  username:
+  password:
+project:
+  name: "Bitbucket Project"
+  description:  "Automation of user addition in Bitbucket"
+  organization: "Default"
+  scm_type: git
+  scm_url: "https://github.com/hwalter734/GBM-Ansible-Bitbucket.git"

@@ -1,0 +1,13 @@
+---
+## example file for how to choose a demo
+## chose specific demo or choose all
+# azure-scaleset
+# aws-elb
+# SPECIFIC - example that installs just the deploy_application job template
+demo: bitbucket 
+
+## Ansible Tower login infomation
+my_tower_username:
+my_tower_password:
+my_tower_host:
+workshop_type: rhel

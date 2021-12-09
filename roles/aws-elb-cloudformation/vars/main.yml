@@ -1,0 +1,211 @@
+---
+# vars file for roles/aws-elb-cloudformation
+name: "AWS ELB Cloudformation/ Deploy Environment"
+description: "AWS ELB Cloudformation / Deploy Environment"
+job_type: "run"
+become_enabled: true
+playbook: "tower_deploy_vpc_playbook.yml"
+create:
+  name: "AWS ELB Cloudformation/ Deploy Environment"
+  description: "AWS ELB Cloudformation/ Deploy Environment"
+  job_type: "run"
+  playbook: "tower_deploy_vpc_playbook.yml"
+delete_all:
+  name: "AWS / Delete environment"
+  description: "AWS / Delete environment"
+  job_type: "run"
+  playbook:  "delete.yml"
+  survey_enabled: true
+inventory: 
+  name: "AWS Development environment"
+  description: "AWS Development environment"
+  organization: "Default"
+  source:
+    name: "AWS Development environment"
+    description: "AWS Development environment"
+    source: "ec2"
+    update_on_launch: true
+    overwrite: true
+    overwrite_vars: true
+credential_aws: 
+  name: "AWS"
+  description: "AWS credentials"
+  organization: "Default"
+  credential_type: "aws"
+  access_key:
+  secret_key:
+credential: 
+  name: "AWS Credential"
+  description: "AWS machine credentials"
+  organization: "Default"
+  credential_type: "ssh"
+  username: "ec2-user"
+  private_key:
+project:
+  name: "Deploy AWS ELB with Custom App"
+  description: "Deploy AWS ELB with Custom App"
+  organization: "Default"
+  scm_type: git
+  scm_url: "https://github.com/hwalter734/GBM-AWS-ELB-Cloudformation.git" 
+deploy_ec2:
+  name: "AWS / Deploy AWS ELB with Custom App"
+  description: "AWS / Deploy AWS ELB with Custom App"
+  playbook: "tower_deploy_vpc_playbook.yml"
+  organization: "Default"
+  survey_enabled: true
+  survey_spec:
+    name: AWS Hardened Instance survey 
+    description: Provisioning a AWS hardened instance
+    spec:
+      - type: text
+        question_name: Please, enter your AWS access key
+        variable: aws_access_key 
+        required: true
+        default: "{{ credential_aws.access_key }}"
+
+      - type: password
+        question_name: Please, enteryour AWS secret key
+        variable: aws_secret_key 
+        required: true
+        default: "{{ credential_aws.secret_key }}"
+
+      - type: multiplechoice
+        question_name: Please, enter your desired region 
+        variable: region 
+        required: true
+        default: "us-east-1" 
+        choices:
+          - "us-east-1"
+
+      - type: text
+        question_name: Please, enter your desired AMI ID 
+        variable: ami_id 
+        required: true
+        default: "ami-09d8b5222f2b93bf0"
+
+      - type: text
+        question_name: Please, enter your desired VPC CIDR 
+        variable: vpc_cidr_block
+        required: true
+        default: "12.0.0.0/16"
+
+      - type: text
+        question_name: Please, enter your desired VPC name 
+        variable: vpc_name
+        required: true
+        default: "example1" 
+
+      - type: text
+        question_name: Please, enter your desired Internet Gateway name 
+        variable: igw_name
+        required: true
+        default: "igw_example1" 
+        
+      - type: text
+        question_name: Please, enter your desired first public subnet CIDR 
+        variable: subnet1_cidr
+        required: true
+        default: "12.0.1.0/24" 
+
+      - type: text
+        question_name: Please, enter your desired first public subnet availability zone
+        variable: subnet1_az
+        required: true
+        default: "us-east-1a" 
+
+      - type: text
+        question_name: Please, enter your desired first public subnet name 
+        variable: subnet1_name
+        required: true
+        default: "subnet1-1a" 
+
+      - type: text
+        question_name: Please, enter your desired second public subnet CIDR 
+        variable: subnet2_cidr
+        required: true
+        default: "12.0.1.0/24" 
+
+      - type: text
+        question_name: Please, enter your desired second public subnet availability zone
+        variable: subnet2_az
+        required: true
+        default: "us-east-1b" 
+
+      - type: text
+        question_name: Please, enter your desired first public subnet name 
+        variable: subnet2_name
+        required: true
+        default: "subnet2-1b" 
+
+      - type: text
+        question_name: Please, enter your desired route table name 
+        variable: route_table_name
+        required: true
+        default: "rtb_example1" 
+
+      - type: text
+        question_name: Please, enter your desired security group name 
+        variable: sg_example1 
+        required: true
+        default: "sg_example1" 
+
+      - type: text
+        question_name: Please, enter your desired target group name 
+        variable: target_group_name 
+        required: true
+        default: "tg-example1" 
+
+      - type: text
+        question_name: Please, enter your desired target group protocol
+        variable: target_group_protocol 
+        required: true
+        default: "HTTP" 
+
+      - type: integer
+        question_name: Please, enter your desired target group port
+        variable: target_group_port
+        required: true
+        default: 80 
+
+      - type: text
+        question_name: Please, enter your desired elastic load balancer name
+        variable: elb_name 
+        required: true
+        default: "elb-example1" 
+
+      - type: text
+        question_name: Please, enter your desired ELB protocol
+        variable: elb_protocol
+        required: true
+        default: "HTTP" 
+
+      - type: integer
+        question_name: Please, enter your desired ELB group port
+        variable: elb_port 
+        required: true
+        default: 80 
+
+      - type: text
+        question_name: Please, enter your desired ELB protocol type
+        variable: elb_type 
+        required: true
+        default: "forward"
+
+      - type: text
+        question_name: Please, enter the name of the first EC2 instance 
+        variable: ec2_instance1_name 
+        required: true
+        default: "testinginstance1"
+
+      - type: text
+        question_name: Please, enter the name of the second EC2 instance 
+        variable: ec2_instance2_name 
+        required: true
+        default: "testinginstance2"
+
+  schema:
+    - job_template: "{{ create.name }}"
+      success:
+        - inventory_source: "{{ inventory.name }}"
+          failure:
+            - job_template: "{{ delete_all.name }}"

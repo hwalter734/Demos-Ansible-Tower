@@ -1,0 +1,76 @@
+---
+# vars file for roles/azure-scaleset
+name: "AWS Hardening/ Deploy Environment"
+description: "Azure Hardening / Deploy Environment"
+job_type: "run"
+become_enabled: true
+playbook: "main_part_1.yml"
+create:
+  name: "AWS Hardening/ Deploy Environment"
+  description: "Azure Hardening / Deploy Environment"
+  job_type: "run"
+  playbook: "main_part_1.yml"
+delete_all:
+  name: "AWS / Delete environment"
+  description: "AWS / Delete environment"
+  job_type: "run"
+  playbook:  "remove_rg.yml"
+inventory: 
+  name: "AWS Development environment"
+  description: "AWS Development environment"
+  organization: "Default"
+  source:
+    name: "AWS Development environment"
+    description: "AWS Development environment"
+    source: "ec2"
+    update_on_launch: true
+    overwrite: true
+    overwrite_vars: true
+credential_aws: 
+  name: "AWS"
+  description: "AWS credentials"
+  organization: "Default"
+  credential_type: "aws"
+  access_key: 
+  secret_key:
+credential: 
+  name: "AWS Credential"
+  description: "AWS machine credentials"
+  organization: "Default"
+  credential_type: "ssh"
+  username: "ec2-user"
+  private_key:
+project:
+  name: "Deploy Hardened AWS Instance"
+  description: "Deploy Hardened AWS Instance"
+  organization: "Default"
+  scm_type: git
+  scm_url: "https://github.com/hwalter734/GBM-Ansible-AWS-Hardening.git"
+deploy_ec2:
+  name: "AWS / Deploy Hardened Instance"
+  description: "AWS / Deploy Hardened Instance"
+  organization: "Default"
+  playbook: "main_part_1.yml"
+  survey_enabled: true
+  survey_spec:
+    name: AWS Hardened Instance survey 
+    description: Provisioning a AWS hardened instance
+    spec:
+      - type: text
+        question_name: Please, enter your AWS account number 
+        variable: aws_user_number_id 
+        required: true
+        default:
+
+      - type: text
+        question_name: Please, enter your desired S3 bucket name 
+        variable: s3_bucket_name 
+        required: true
+        default:
+        
+  schema:
+    - job_template: "{{ create.name }}"
+      success:
+        - inventory_source: "{{ inventory.name }}"
+          failure:
+            - job_template: "{{ delete_all.name }}"

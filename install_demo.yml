@@ -1,0 +1,31 @@
+---
+- name: Setup deploy demos
+  hosts: localhost
+  gather_facts: false
+  connection: local
+
+  tasks:
+    - name: Install demo of application load balancer on AWS
+      include_role:
+        name: "../roles/aws-elb-cloudformation"
+      when: demo == 'all' or demo == 'aws-elb-cloudformation'
+
+    - name: Install demo of Scale set on Azure
+      include_role:
+        name: "../roles/azure-autoscale"
+      when: demo == 'all' or demo == 'azure-autoscale'
+
+    - name: Install demo of hardened instance in AWS 
+      include_role:
+        name: "../roles/aws-hardening"
+      when: demo == 'all' or demo == 'aws-hardening'
+
+    - name: Install demo of Satellite in Azure 
+      include_role:
+        name: "../roles/azure-satellite"
+      when: demo == 'all' or demo == 'azure-satellite'
+
+    - name: Install demo of Satellite in Azure 
+      include_role:
+        name: "../roles/bitbucket"
+      when: demo == 'all' or demo == 'bitbucket'

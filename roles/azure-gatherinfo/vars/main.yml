@@ -1,0 +1,158 @@
+---
+create:
+  name: "Azure Gather Info / Deploy Environment"
+  description: "Azure Gather Info / Deploy Environment"
+  job_type: "run"
+  playbook: "configure_mysqldb.yml"
+configure:
+  name: "Azure Satellite / Setup Volumes"
+  description: "Azure Satellite / Setup volumes"
+  job_type: "run"
+  playbook: "gather_apps_playbook.yml"
+setup:
+  name: "Azure Satellite / Setup Vagrant"
+  description: "Azure Satellite / Setup Vagrant"
+  job_type: "run"
+  playbook: "install_vagrant.yml"
+delete_all:
+  name: "Azure / Delete all environment"
+  description: "Azure / Delete all environment"
+  job_type: "run"
+  playbook: "tower_remove_rg.yml"
+inventory: 
+  name: "Azure Development environment"
+  description: "Azure Development environment"
+  organization: "Default"
+  source:
+    name: "Azure Development environment"
+    description: "Azure Development environment"
+    source: "azure_rm"
+    update_on_launch: false
+    overwrite: true
+    overwrite_vars: true
+credential_azure: 
+  name: "Azure"
+  description: "Azure credentials"
+  organization: "Default"
+  credential_type: "azure_rm"
+  username: "hwalter@gbm.net"
+  subscription: 5dc923d3-a286-4275-95dd-0795dfc4bdf8 
+  tenant: bb66f723-9eb9-405b-7889-2e722a5a5a45
+  password: flockJUNES4979%
+credential: 
+  name: "Azure Credential"
+  description: "Azure machine credentials"
+  organization: "Default"
+  credential_type: "ssh"
+  username: "azureuser"
+  private_key: "~/azurekey"
+project:
+  name: "Deploy Satellite and Tower environment"
+  description:  "Deploy Satellite and Tower environment"
+  organization: "Default"
+  scm_type: git
+  scm_url: "https://github.com/hwalter734/GBM-Azure-SatEnv.git"
+workflow:
+  name: "Azure / Deploy Satellite and Tower environment"
+  description: "Azure / Deploy Satellite and Tower environment"
+  organization: "Default"
+  survey_enabled: true
+  survey_spec:
+    name: Azure vm scale set survey 
+    description: Provisioning a vm scale set in Azure
+    spec:
+      - type: text
+        question_name: Enter your desired resource group name 
+        question_description: It should be a new resource group, not an existing one 
+        variable: resource_group
+        required: true
+        default: maingroup
+
+      - type: text
+        question_name: Enter your desired public ip name 
+        variable: public_ip_name 
+        required: true
+        default: mypublicipname 
+
+      - type: text
+        question_name: Enter your desired virtual network name 
+        variable: vn_name 
+        required: true
+        default: myvn 
+
+      - type: text
+        question_name: Enter your desired security group name 
+        variable: sg_name 
+        required: true
+        default: mysggroup 
+
+      - type: text
+        question_name: Enter your desired location to deploy the environment to 
+        variable: location 
+        required: true
+        default: "eastus" 
+
+      - type: text
+        question_name: Enter your admin username to use in the VMs 
+        variable: admin_username 
+        required: true
+        default: "johndoe" 
+
+      - type: password 
+        question_name: Enter your admin password to use in the VMs 
+        variable: admin_password
+        required: true
+        default: "johndoeGT12345!" 
+
+      - type: text
+        question_name: Enter the desired vn address 
+        variable: vn_address_var 
+        required: true
+        default: "10.0.0.0/16" 
+
+      - type: text
+        question_name: Enter the desired ubuntu instance address
+        variable: vn_address_var 
+        required: true
+        default: "10.0.1.0/24" 
+
+      - type: text
+        question_name: Enter the desired ubuntu instance subnet name
+        variable: ubuntu_subnet_name 
+        required: true
+        default: "ubunutsubnet" 
+
+      - type: text
+        question_name: Enter the desired windows instance address 
+        variable: vn_address_var 
+        required: true
+        default: "10.0.2.0/24" 
+
+      - type: text
+        question_name: Enter the desired windows instance subnet name
+        variable: windows_subnet_name 
+        required: true
+        default: "windowssubnet"
+
+      - type: text
+        question_name: Enter the desired RHEL instance address
+        variable: vn_address_var 
+        required: true
+        default: "10.0.3.0/24" 
+
+      - type: text
+        question_name: Enter the desired RHEL instance subnet name
+        variable: rhel_subnet_name 
+        required: true
+        default: "rhelsubnet"
+        
+  schema:
+    - job_template: "{{ create.name }}"
+      success:
+        - inventory_source: "{{ inventory.name }}"
+          success:
+          - job_template: "{{ configure.name }}"
+            success:
+              - job_template: "{{ setup.name }}"
+                failure:
+                  - job_template: "{{ delete_all.name }}"
