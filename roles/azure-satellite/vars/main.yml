@@ -35,7 +35,7 @@ credential_azure:
   description: "Azure credentials"
   organization: "Default"
   credential_type: "azure_rm"
-  username:
+  username: 
   subscription:
   tenant:
   password:
@@ -335,14 +335,14 @@ workflow:
         question_name: Enter the SSH public key data 
         variable: key_data 
         required: true
-        default:
+        default: 
   schema:
     - job_template: "{{ create.name }}"
       success:
         - inventory_source: "{{ inventory.name }}"
           success:
           - job_template: "{{ configure.name }}"
-            success:
-              - job_template: "{{ setup.name }}"
-                failure:
-                  - job_template: "{{ delete_all.name }}"
+            failure:
+              - job_template: "{{ delete_all.name }}"
+            #            success:
+            #  - job_template: "{{ setup.name }}"
