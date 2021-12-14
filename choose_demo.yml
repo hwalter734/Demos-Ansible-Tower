@@ -1,8 +1,12 @@
 ---
 ## example file for how to choose a demo
 ## chose specific demo or choose all
-# azure-scaleset
-# aws-elb
+# azure-autoscale
+# aws-elb-cloudformation
+# azure-satellite
+# aws-satellite
+# aws-hardening
+# bitbucket
 # SPECIFIC - example that installs just the deploy_application job template
 demo: bitbucket 
 
