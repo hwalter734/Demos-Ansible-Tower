@@ -1,0 +1,188 @@
+---
+create:
+  name: "Azure CMDB / Deploy Environment"
+  description: "Azure CMDB / Deploy Environment"
+  job_type: "run"
+  playbook: "deploy_vms.yml"
+configure:
+  name: "Azure CMDB / Setup MySQL database"
+  description: "Azure CMDB / Setup MySQL database"
+  job_type: "run"
+  playbook: "configure_mysqldb.yml"
+setup:
+  name: "Azure CMDB / Collect Information"
+  description: "Azure CMDB / Collect Information"
+  job_type: "run"
+  playbook: "gather_facts_playbook.yml"
+delete_all:
+  name: "Azure CMDB / Delete CMDB environment"
+  description: "Azure CMDB / Delete CMDB environment"
+  job_type: "run"
+  playbook: "tower_remove_rg.yml"
+inventory: 
+  name: "Main CMDB Demo Inventory"
+  description: "Main CMDB Demo Inventory"
+  organization: "Default"
+  source:
+    name: "Main CMDB Demo Inventory"
+    description: "Main CMDB Demo Inventory"
+    source: "azure_rm"
+    update_on_launch: false
+    overwrite: true
+    overwrite_vars: true
+credential_azure: 
+  name: "Azure"
+  description: "Azure credentials"
+  organization: "Default"
+  credential_type: "azure_rm"
+  username: "{{ user_azure_username }}"
+  subscription: "{{ user_azure_subscription }}"
+  tenant: "{{ user_azure_tenant }}"
+  password: "{{ user_azure_password }}"
+credential: 
+  name: "Azure Credential"
+  description: "Azure machine credentials"
+  organization: "Default"
+  credential_type: "ssh"
+  username: "{{ azure_ssh_username }}"
+  private_key: "../../../{{ azure_private_key_file }}"
+project:
+  name: "Ansible CMDB Demo Environment"
+  description: "Ansible CMDB Demo Environment"
+  organization: "Default"
+  scm_type: git
+  scm_url: "https://github.com/hwalter734/CMDB-GBM.git"
+workflow:
+  name: "Azure CMDB / Deploy CMDB environment"
+  description: "Azure CMDB / Deploy CMDB environment"
+  organization: "Default"
+  survey_enabled: true
+  survey_spec:
+    name: Azure CMDB Survey 
+    description: Provisioning a CMDB environment in Azure 
+    spec:
+      - type: text
+        question_name: Enter your desired resource group name 
+        question_description: It should be a new resource group, not an existing one
+        variable: resource_group
+        required: true
+        default: maingroup
+
+      - type: text
+        question_name: Enter your desired resource group name of the network cisco instance
+        variable: network_group
+        required: true
+        default: mynetworkgroup 
+
+      - type: text
+        question_name: Enter your desired location to deploy the environment to 
+        variable: location 
+        required: true
+        default: "eastus" 
+
+      - type: text
+        question_name: Enter the desired vn address 
+        variable: vn_address_var 
+        required: true
+        default: "10.0.0.0/16" 
+
+      - type: text
+        question_name: Enter the desired ubuntu instance address
+        variable: ubuntu_instance_addr 
+        required: true
+        default: "10.0.1.0/24" 
+
+      - type: text
+        question_name: Enter the desired windows instance address 
+        variable: windows_instance_addr 
+        required: true
+        default: "10.0.2.0/24" 
+
+      - type: text
+        question_name: Enter the desired RHEL instance address
+        variable: rhel_instance_addr 
+        required: true
+        default: "10.0.3.0/24" 
+
+      - type: text
+        question_name: Enter your desired public ip name 
+        variable: public_ip_name 
+        required: true
+        default: mypublicipname 
+
+      - type: text
+        question_name: Enter your desired virtual network name 
+        variable: vn_name 
+        required: true
+        default: myvn 
+
+      - type: text
+        question_name: Enter your desired security group name 
+        variable: sg_name 
+        required: true
+        default: mysggroup 
+
+      - type: text
+        question_name: Enter the desired group name for the main server instance 
+        variable: main_sg_name 
+        required: true
+        default: secondsggroup 
+
+      - type: text
+        question_name: Enter your admin username to use in the VMs 
+        variable: admin_username 
+        required: true
+        default: "{{ azure_ssh_username }}"
+
+      - type: password 
+        question_name: Enter your admin password to use in the VMs 
+        variable: admin_password
+        required: true
+        default: "{{ azure_ssh_password }}"
+ 
+      - type: text
+        question_name: Enter the desired ubuntu instance subnet name
+        variable: ubuntu_subnet_name 
+        required: true
+        default: "ubuntusubnet" 
+
+      - type: text
+        question_name: Enter the desired windows instance subnet name
+        variable: windows_subnet_name 
+        required: true
+        default: "windowssubnet"
+
+      - type: text
+        question_name: Enter the desired RHEL instance subnet name
+        variable: rhel_subnet_name 
+        required: true
+        default: "rhelsubnet"
+
+      - type: text
+        question_name: Enter the desired RHEL instance name 
+        variable: rhel_instance_name 
+        required: true
+        default: "rhelinstance"
+
+      - type: text
+        question_name: Enter the desired Windows instance name 
+        variable: windows_instance_name 
+        required: true
+        default: "wgbminstance"
+
+      - type: text
+        question_name: Enter the desired Ubuntu instance name 
+        variable: ubuntu_instance_name 
+        required: true
+        default: "ubuntuinstance"
+
+  schema:
+    - job_template: "{{ create.name }}"
+      success:
+        - inventory_source: "{{ inventory.name }}"
+          success:
+            - job_template: "{{ configure.name }}"
+              success:
+                - job_template: "{{ setup.name }}"
+                  #                  failure:
+                  #  - job_template: "{{ delete_all.name }}"
