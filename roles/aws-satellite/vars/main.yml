@@ -12,12 +12,12 @@ delete_all:
   playbook: "delete_env.yml"
   survey_enabled: true
 inventory: 
-  name: "AWS Development environment"
-  description: "AWS Development environment"
+  name: "AWS Satellite Development environment"
+  description: "AWS Satellite Development environment"
   organization: "Default"
   source:
-    name: "AWS Development environment"
-    description: "AWS Development environment"
+    name: "AWS Satellite Development environment"
+    description: "AWS Satellite Development environment"
     source: "ec2"
     update_on_launch: true
     overwrite: true
@@ -27,15 +27,15 @@ credential_aws:
   description: "AWS credentials"
   organization: "Default"
   credential_type: "aws"
-  access_key:
-  secret_key:
+  access_key: "{{ my_aws_access_key }}"
+  secret_key: "{{ my_aws_secret_key }}"
 credential: 
   name: "AWS Credential"
   description: "AWS machine credentials"
   organization: "Default"
   credential_type: "ssh"
   username: "ec2-user"
-  private_key:
+  private_key: "../../../{{ aws_key_name }}"
 project:
   name: "Deploy AWS Satellite Env"
   description: "Deploy AWS Satellite Env"

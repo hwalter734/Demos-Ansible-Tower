@@ -6,17 +6,17 @@ create:
   job_type: "run"
   playbook: "setup_env.yml"
 delete_all:
-  name: "Azure / Delete all environment"
-  description: "Azure / Delete all environment"
+  name: "Azure Autoscale / Delete all environment"
+  description: "Azure Autoscale / Delete all environment"
   job_type: "run"
   playbook:  "remove_rg.yml"
 inventory: 
-  name: "Azure Development environment"
-  description: "Azure Development environment"
+  name: "Azure Autoscale Development environment"
+  description: "Azure Autoscale Development environment"
   organization: "Default"
   source:
-    name: "Azure Development environment"
-    description: "Azure Development environment"
+    name: "Azure Autoscale Development environment"
+    description: "Azure Autoscale Development environment"
     source: "azure_rm"
     update_on_launch: true
     overwrite: true
@@ -26,41 +26,42 @@ credential_azure:
   description: "Azure credentials"
   organization: "Default"
   credential_type: "azure_rm"
-  subscription:
-  tenant:
-  password:
+  username: "{{ user_azure_username }}"
+  subscription: "{{ user_azure_subscription }}"
+  tenant: "{{ user_azure_tenant }}"
+  password: "{{ user_azure_password }}"
 credential: 
   name: "Azure Credential"
   description: "Azure machine credentials"
   organization: "Default"
   credential_type: "ssh"
-  username:
-  private_key:
+  username: "{{ azure_ssh_username }}"
+  private_key: "../../../{{ azure_private_key_file }}"
 project:
-  name: "Deploy Scale Set on Azure"
-  description:  "Deploy Scale Set on Azure"
+  name: "Deploy Autoscale Set on Azure"
+  description:  "Deploy Autoscale Set on Azure"
   organization: "Default"
   scm_type: git
   scm_url: "https://github.com/hwalter734/GBM-Ansible-Tower-Azure-Demo.git"
 workflow:
-  name: "Azure / Deploy Scale Set"
-  description: "Azure / Deploy Scale Set"
+  name: "Azure / Deploy Autoscale Set"
+  description: "Azure / Deploy Autoscale Set"
   organization: "Default"
   survey_enabled: true
   survey_spec:
-    name: Azure vm scale set survey 
-    description: Provisioning a vm scale set in Azure
+    name: Azure vm autoscale set survey 
+    description: Provisioning a autoscale set in Azure
     spec:
       - type: text
-        question_name: Por favor, ingrese el nombre de su grupo de recursos 
-        question_description: Preferiblemente que sea un nuevo grupo 
+        question_name: Please, enter the desired name of your resource group 
+        question_description: It should be a new group 
         variable: resource_group
         required: true
         default: myubuntugroup
         
       - type: multiplechoice
-        question_name: Por favor, ingrese la región donde desea hacer su grupo de recursos 
-        question_description: Seleccione una 
+        question_name: Please enter the desired region to deploy your resources on 
+        question_description: Choose one
         variable: location
         required: true
         default: eastus 
@@ -71,33 +72,33 @@ workflow:
           - centralus
 
       - type: text
-        question_name: Por favor, ingrese la dirección ip de su virtual network 
-        question_description: Asegúrese que la dirección ip sea válida 
+        question_name: Please, enter the ip address of your virtual network 
+        question_description: Make sure its a valid ip address 
         variable: vn_address_var 
         required: true
         default: "10.1.0.0/16" 
 
       - type: text
-        question_name: Por favor, ingrese el nombre de su virtual network 
+        question_name: Please, enter the name of your virtual network 
         variable: vmss_name_network
         required: true
         default: "myvn"
 
       - type: text
-        question_name: Por favor, ingrese la dirección ip de su virtual subnet 
-        question_description: Asegúrese que la dirección ip sea válida 
+        question_name: Please, enter the ip address of your subnet 
+        question_description: Make sure its a valid ip address 
         variable: subnet_address_var 
         required: true
         default: "10.1.0.0/24" 
 
       - type: text
-        question_name: Por favor, ingrese el nombre de su load balancer
+        question_name: Please, enter the name of your load balancer 
         variable: vmss_name_lb
         required: true
         default: mylb 
 
       - type: text
-        question_name: Por favor, ingrese el nombre de su virtual machine scaleset 
+        question_name: Please, enter the name of your virtual machine scale set 
         variable: vmss_name
         required: true
         default: myvmss
@@ -113,14 +114,14 @@ workflow:
         question_name: Please, enter your desired username 
         variable: admin_username
         required: true
-        default: "{{ user_azure_username }}"
+        default: "{{ azure_ssh_username }}"
 
       - type: password
         question_name: Please enter your desired admin password 
         question_description: The password must contain at least 6 characters, one upper case and lower case letter, and a special character
         variable: admin_password
         required: true
-        default: "{{ user_azure_vmss_password }}"
+        default: "{{ azure_ssh_password }}"
 
       - type: text
         question_name: Please, enter your desired auto scale profile name 
@@ -151,8 +152,8 @@ workflow:
           - "5"
 
       - type: multiplechoice 
-        question_name: Please, enter the type of upgrade policy you want to use 
-        question_description: "Manual: Al hacer un cambio al scale set, se tiene que aplicar manualmente los cambios a cada máquina virtual del scale set. Automatic: Los cambios efectuados en el scale set se aplican automáticamente a todas las máquinas virtuales y se reinician."
+        question_name: Please, enter the type of upgrade policy you want to use
+        question_description: "Manual: When making a change to the scale set, the user needs to apply manually all changes to each virtual machine of the scale set. Automatic: All changes made in the scale set will automatically apply to all virtual machines and will reboot"
         variable: policy_var 
         required: true
         default: Automatic

@@ -11,18 +11,18 @@ create:
   job_type: "run"
   playbook: "tower_deploy_vpc_playbook.yml"
 delete_all:
-  name: "AWS / Delete environment"
-  description: "AWS / Delete environment"
+  name: "AWS ELB / Delete environment"
+  description: "AWS ELB / Delete environment"
   job_type: "run"
   playbook:  "delete.yml"
   survey_enabled: true
 inventory: 
-  name: "AWS Development environment"
-  description: "AWS Development environment"
+  name: "AWS ELB Cloudformation Development environment"
+  description: "AWS ELB Cloudformation Development environment"
   organization: "Default"
   source:
-    name: "AWS Development environment"
-    description: "AWS Development environment"
+    name: "AWS ELB Cloudformation Development environment"
+    description: "AWS ELB Cloudformation Development environment"
     source: "ec2"
     update_on_launch: true
     overwrite: true
@@ -32,15 +32,15 @@ credential_aws:
   description: "AWS credentials"
   organization: "Default"
   credential_type: "aws"
-  access_key:
-  secret_key:
+  access_key: "{{ my_aws_access_key }}"
+  secret_key: "{{ my_aws_secret_key }}"
 credential: 
   name: "AWS Credential"
   description: "AWS machine credentials"
   organization: "Default"
   credential_type: "ssh"
   username: "ec2-user"
-  private_key:
+  private_key: "../../../{{ aws_key_name }}"
 project:
   name: "Deploy AWS ELB with Custom App"
   description: "Deploy AWS ELB with Custom App"

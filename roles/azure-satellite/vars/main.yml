@@ -35,17 +35,17 @@ credential_azure:
   description: "Azure credentials"
   organization: "Default"
   credential_type: "azure_rm"
-  username: 
-  subscription:
-  tenant:
-  password:
+  username: "{{ user_azure_username }}"
+  subscription: "{{ user_azure_subscription }}"
+  tenant: "{{ user_azure_tenant }}"
+  password: "{{ user_azure_password }}"
 credential: 
   name: "Azure Credential"
   description: "Azure machine credentials"
   organization: "Default"
   credential_type: "ssh"
-  username:
-  private_key:
+  username: "{{ azure_ssh_username }}"
+  private_key: "../../../{{ azure_private_key_file }}"
 project:
   name: "Deploy Satellite and Tower environment"
   description:  "Deploy Satellite and Tower environment"
@@ -58,8 +58,8 @@ workflow:
   organization: "Default"
   survey_enabled: true
   survey_spec:
-    name: Azure vm scale set survey 
-    description: Provisioning a vm scale set in Azure
+    name: Azure satellite environment 
+    description: Provisioning a satellite environment in azure 
     spec:
       - type: text
         question_name: Enter your desired resource group name 

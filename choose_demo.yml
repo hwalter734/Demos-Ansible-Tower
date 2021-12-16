@@ -29,8 +29,14 @@ workshop_type: rhel
 #aws_user_bucket:
 
 ## For use with azure demos
+#azure_ssh_username:
+#azure_ssh_password:
+#The ssh password must contain at least 6 characters, one upper case and lower case letter, and a special character
 #user_azure_password:
 #user_azure_username:
+#user_azure_subscription
+#user_azure_tenant
+#azure_private_key_file:
 
 ## For use with azure autoscale demo
 #user_azure_vmss_password:
