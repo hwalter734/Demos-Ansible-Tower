@@ -34,8 +34,8 @@ workshop_type: rhel
 #The ssh password must contain at least 6 characters, one upper case and lower case letter, and a special character
 #user_azure_password:
 #user_azure_username:
-#user_azure_subscription
-#user_azure_tenant
+#user_azure_subscription:
+#user_azure_tenant:
 #azure_private_key_file:
 
 ## For use with azure autoscale demo
