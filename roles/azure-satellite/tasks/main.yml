@@ -1,0 +1,166 @@
+---
+# tasks file for roles/azure-scaleset
+- name: Add Azure tower credential
+  tower_credential:
+    name: "{{ credential_azure.name }}"
+    description: "{{ credential_azure.description }}"
+    organization: "{{ credential_azure.organization }}"
+    kind: "{{ credential_azure.credential_type }}"
+    subscription: "{{ credential_azure.subscription }}"
+    tenant: "{{ credential_azure.tenant }}"
+    username: "{{ credential_azure.username }}"
+    password: "{{ credential_azure.password }}"
+    tower_username: "{{ my_tower_username }}"
+    tower_password: "{{ my_tower_password }}"
+    tower_host: "{{ my_tower_host }}"
+    validate_certs: false
+
+- name: Add Azure machine credential
+  tower_credential:
+    name: "{{ credential.name }}"
+    description: "{{ credential.description }}"
+    organization: "{{ credential.organization }}"
+    kind: "{{ credential.credential_type }}"
+    ssh_key_data: "{{ lookup('file', credential.private_key) }}"
+    username: "{{ credential.username }}"
+    tower_username: "{{ my_tower_username }}"
+    tower_password: "{{ my_tower_password }}"
+    tower_host: "{{ my_tower_host }}"
+    validate_certs: false
+
+- name: Add tower inventory
+  tower_inventory:
+    name: "{{ inventory.name }}"
+    description: "{{ inventory.description }}"
+    organization: "{{ inventory.organization }}"
+    tower_username: "{{ my_tower_username }}"
+    tower_password: "{{ my_tower_password }}"
+    tower_host: "{{ my_tower_host }}"
+    validate_certs: false
+
+- name: Add tower inventory source
+  tower_inventory_source:
+    name: "{{ inventory.source.name }}"
+    description: "{{ inventory.source.description }}"
+    inventory: "{{ inventory.name }}"
+    credential: "{{ credential_azure.name }}"
+    source: "{{ inventory.source.source }}"
+    update_on_launch: "{{ inventory.source.update_on_launch }}"
+    overwrite: "{{ inventory.source.overwrite }}"
+    overwrite_vars: "{{ inventory.source.overwrite }}"
+    tower_username: "{{ my_tower_username }}"
+    tower_password: "{{ my_tower_password }}"
+    tower_host: "{{ my_tower_host }}"
+    validate_certs: false
+
+- name: add tower project
+  tower_project:
+    name: "{{ project.name }}"
+    description: "{{ project.description }}"
+    organization: "{{ project.organization }}"
+    scm_type: "{{ project.scm_type }}"
+    scm_url: "{{ project.scm_url }}"
+    tower_username: "{{ my_tower_username }}"
+    tower_password: "{{ my_tower_password }}"
+    tower_host: "{{ my_tower_host }}"
+    validate_certs: false
+
+- name: add job template {{ create.name }} with survey
+  tower_job_template:
+    name: "{{ create.name }}"
+    description: "{{ create.description }}"
+    job_type: "{{ create.job_type }}"
+    become_enabled: "{{ create.become_enabled | default('false') }}"
+    inventory: "{{ inventory.name }}"
+    project: "{{ project.name }}"
+    playbook: "{{ create.playbook }}"
+    fact_caching_enabled: "{{ fact_caching_enabled | default('false') }}"
+    credential: "{{ credential_azure.name }}"
+    survey_enabled: "{{ workflow.survey_enabled }}"
+    survey_spec: "{{ workflow.survey_spec }}"
+    tower_username: "{{ my_tower_username }}"
+    tower_password: "{{ my_tower_password }}"
+    tower_host: "{{ my_tower_host }}"
+    validate_certs: false
+  when:
+    - workshop_type in workshop_type
+  register: add_job_template
+  until: add_job_template is not failed
+  retries: 5
+
+- name: add job template {{ configure.name }} without survey
+  tower_job_template:
+    name: "{{ configure.name }}"
+    description: "{{ configure.description }}"
+    job_type: "{{ configure.job_type }}"
+    become_enabled: "{{ configure.become_enabled | default('false') }}"
+    inventory: "{{ inventory.name }}"
+    project: "{{ project.name }}"
+    playbook: "{{ configure.playbook }}"
+    fact_caching_enabled: "{{ fact_caching_enabled | default('false') }}"
+    credential: "{{ credential.name }}"
+    tower_username: "{{ my_tower_username }}"
+    tower_password: "{{ my_tower_password }}"
+    tower_host: "{{ my_tower_host }}"
+    validate_certs: false
+  when:
+    - workshop_type in workshop_type
+  register: add_job_template
+  until: add_job_template is not failed
+  retries: 5
+
+- name: add job template {{ setup.name }} without survey
+  tower_job_template:
+    name: "{{ setup.name }}"
+    description: "{{ setup.description }}"
+    job_type: "{{ setup.job_type }}"
+    become_enabled: "{{ setup.become_enabled | default('false') }}"
+    inventory: "{{ inventory.name }}"
+    project: "{{ project.name }}"
+    playbook: "{{ setup.playbook }}"
+    fact_caching_enabled: "{{ fact_caching_enabled | default('false') }}"
+    credential: "{{ credential_azure.name }}"
+    tower_username: "{{ my_tower_username }}"
+    tower_password: "{{ my_tower_password }}"
+    tower_host: "{{ my_tower_host }}"
+    validate_certs: false
+  when:
+    - workshop_type in workshop_type
+  register: add_job_template
+  until: add_job_template is not failed
+  retries: 5
+
+- name: add job template {{ delete_all.name }} without survey
+  tower_job_template:
+    name: "{{ delete_all.name }}"
+    description: "{{ delete_all.description }}"
+    job_type: "{{ delete_all.job_type }}"
+    become_enabled: "{{ delete_all.become_enabled | default('false') }}"
+    inventory: "{{ inventory.name }}"
+    project: "{{ project.name }}"
+    playbook: "{{ delete_all.playbook }}"
+    fact_caching_enabled: "{{ fact_caching_enabled | default('false') }}"
+    credential: "{{ credential_azure.name }}"
+    tower_username: "{{ my_tower_username }}"
+    tower_password: "{{ my_tower_password }}"
+    tower_host: "{{ my_tower_host }}"
+    validate_certs: false
+  when:
+    - workshop_type in workshop_type
+  register: add_job_template
+  until: add_job_template is not failed
+  retries: 5
+
+- name: "install workflow template to {{ workflow.name }}"
+  tower_workflow_template:
+    name: "{{ workflow.name }}"
+    description: "{{ workflow.description }}"
+    organization: "{{ workflow.organization }}"
+    survey_enabled: "{{ workflow.survey_enabled }}"
+    schema: "{{ workflow.schema }}"
+    survey: "{{ workflow.survey_spec }}"
+    tower_username: "{{ my_tower_username }}"
+    tower_password: "{{ my_tower_password }}"
+    tower_host: "{{ my_tower_host }}"
+    validate_certs: false
+  register: __workflow

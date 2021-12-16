@@ -1,0 +1,106 @@
+---
+# tasks file for aws-elb
+- name: Add AWS tower credential
+  tower_credential:
+    name: "{{ credential_aws.name }}"
+    description: "{{ credential_aws.description }}"
+    organization: "{{ credential_aws.organization }}"
+    kind: "{{ credential_aws.credential_type }}"
+    username: "{{ credential_aws.access_key }}"
+    password: "{{ credential_aws.secret_key }}"
+    tower_username: "{{ my_tower_username }}"
+    tower_password: "{{ my_tower_password }}"
+    tower_host: "{{ my_tower_host }}"
+    validate_certs: false
+
+- name: Add AWS machine credential
+  tower_credential:
+    name: "{{ credential.name }}"
+    description: "{{ credential.description }}"
+    organization: "{{ credential.organization }}"
+    kind: "{{ credential.credential_type }}"
+    username: "{{ credential.username }}"
+    ssh_key_data: "{{ lookup('file', credential.private_key) }}"
+    tower_username: "{{ my_tower_username }}"
+    tower_password: "{{ my_tower_password }}"
+    tower_host: "{{ my_tower_host }}"
+    validate_certs: false
+
+- name: Add tower inventory
+  tower_inventory:
+    name: "{{ inventory.name }}"
+    description: "{{ inventory.description }}"
+    organization: "{{ inventory.organization }}"
+    tower_username: "{{ my_tower_username }}"
+    tower_password: "{{ my_tower_password }}"
+    tower_host: "{{ my_tower_host }}"
+    validate_certs: false
+
+- name: Add tower inventory source
+  tower_inventory_source:
+    name: "{{ inventory.source.name }}"
+    description: "{{ inventory.source.description }}"
+    inventory: "{{ inventory.name }}"
+    credential: "{{ credential_aws.name }}"
+    source: "{{ inventory.source.source }}"
+    update_on_launch: "{{ inventory.source.update_on_launch }}"
+    overwrite: "{{ inventory.source.overwrite }}"
+    overwrite_vars: "{{ inventory.source.overwrite }}"
+    tower_username: "{{ my_tower_username }}"
+    tower_password: "{{ my_tower_password }}"
+    tower_host: "{{ my_tower_host }}"
+    validate_certs: false
+
+- name: add tower project
+  tower_project:
+    name: "{{ project.name }}"
+    description: "{{ project.description }}"
+    organization: "{{ project.organization }}"
+    scm_type: "{{ project.scm_type }}"
+    scm_url: "{{ project.scm_url }}"
+    tower_username: "{{ my_tower_username }}"
+    tower_password: "{{ my_tower_password }}"
+    tower_host: "{{ my_tower_host }}"
+    validate_certs: false
+    scm_update_on_launch: yes
+
+- name: add single job template to create ec2 with survey
+  tower_job_template:
+    name: "{{ create.name }}"
+    description: "{{ create.description }}"
+    job_type: "{{ job_type }}"
+    inventory: "{{ inventory.name }}"
+    project: "{{ project.name }}"
+    playbook: "{{ create.playbook }}"
+    credential: "{{ credential_aws.name}}"
+    survey_enabled: "{{ create.survey_enabled }}"
+    survey_spec: "{{ create.survey_spec }}"
+    tower_username: "{{ my_tower_username }}"
+    tower_password: "{{ my_tower_password }}"
+    tower_host: "{{ my_tower_host }}"
+    validate_certs: false
+  when:
+    - workshop_type in workshop_type
+  register: __create_ec2_machines
+  until: __create_ec2_machines is not failed
+  retries: 5
+
+- name: add single job template to delete all
+  tower_job_template:
+    name: "{{ delete_all.name }}"
+    description: "{{ delete_all.description }}"
+    job_type: "{{ job_type }}"
+    inventory: "{{ inventory.name }}"
+    project: "{{ project.name }}"
+    playbook: "{{ delete_all.playbook }}"
+    credential: "{{ credential_aws.name }}"
+    survey_enabled: "{{ delete_all.survey_enabled }}"
+    tower_username: "{{ my_tower_username }}"
+    tower_password: "{{ my_tower_password }}"
+    tower_host: "{{ my_tower_host }}"
+    validate_certs: false
+  when:
+    - workshop_type in workshop_type
+  register: add_job_template
+  until: add_job_template is not failed
+  retries: 5
