@@ -57,7 +57,7 @@ create:
         question_name: Please, enter your personal ssh key configured in AWS 
         variable: key_name  
         required: true
-        default:
+        default: "{{ aws_key_name }}"
 
       - type: multiplechoice
         question_name: Please, enter your desired region 

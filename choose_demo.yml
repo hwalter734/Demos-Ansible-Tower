@@ -21,6 +21,9 @@ workshop_type: rhel
 #my_aws_access_key: 
 #my_aws_secret_key: 
 
+## For use with AWS Satellite Demo
+#aws_key_name:
+
 ## For use with AWS Hardening demo
 #aws_account_number_id:
 #aws_user_bucket:
@@ -34,3 +37,10 @@ workshop_type: rhel
 
 ## For use with Azure Satellite Demo
 #ssh_public_key_data:
+
+## For use with bitbucket demo
+#bitbucket_username:
+#bitbucket_password:
+#bitbukcet_reponame:
+#bitbucket_workspace:
+#user_file:

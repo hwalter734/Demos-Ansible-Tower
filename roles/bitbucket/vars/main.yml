@@ -15,25 +15,25 @@ create:
         question_description: Usually this is the workspace name followed by "-admin" 
         variable: admin_username 
         required: true
-        default:
+        default: "{{ bitbucket_username }}"
 
       - type: password
         question_name: Enter your admin password of your Bitbucket account 
         variable: admin_password 
         required: true
-        default:
+        default: "{{ bitbucket_password }}"
 
       - type: text
         question_name: Enter your repository name 
         variable: repo_name 
         required: true
-        default:
+        default: "{{ bitbukcet_reponame }}"
 
       - type: text
         question_name: Enter your workspace name 
         variable: workspace 
         required: true
-        default:
+        default: "{{ bitbucket_workspace }}"
 
       - type: text
         question_name: Enter the desired permission for the users included within your csv or txt file
@@ -48,7 +48,7 @@ create:
         question_name: Enter the csv or txt file containing the desired users 
         variable: file  
         required: true
-        default:
+        default: "{{ user_file }}"
 
       - type: text
         question_name: Enter the delimiter used in your csv or txt file 
