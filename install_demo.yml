@@ -7,18 +7,8 @@
   tasks:
     - name: Install demo of application load balancer on AWS
       include_role:
-        name: "../roles/aws-elb"
-      when: demo == 'all' or demo == 'aws-elb'
-
-    - name: Install demo of application load balancer on AWS
-      include_role:
         name: "../roles/aws-elb-cloudformation"
       when: demo == 'all' or demo == 'aws-elb-cloudformation'
-
-    - name: Install demo of Scale set on Azure
-      include_role:
-        name: "../roles/azure-scaleset"
-      when: demo == 'all' or demo == 'azure-scaleset'
 
     - name: Install demo of Scale set on Azure
       include_role:

@@ -2,8 +2,9 @@
 ## example file for how to choose a demo
 ## chose specific demo or choose all
 # azure-autoscale
-# aws-elb-cloudformation
 # azure-satellite
+# azure-cmdb
+# aws-elb-cloudformation
 # aws-satellite
 # aws-hardening
 # bitbucket
@@ -15,3 +16,21 @@ my_tower_username:
 my_tower_password:
 my_tower_host:
 workshop_type: rhel
+
+## For use with aws demos
+#my_aws_access_key: 
+#my_aws_secret_key: 
+
+## For use with AWS Hardening demo
+#aws_account_number_id:
+#aws_user_bucket:
+
+## For use with azure demos
+#user_azure_password:
+#user_azure_username:
+
+## For use with azure autoscale demo
+#user_azure_vmss_password:
+
+## For use with Azure Satellite Demo
+#ssh_public_key_data:

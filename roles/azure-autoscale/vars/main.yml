@@ -107,20 +107,20 @@ workflow:
         question_description: The password must contain at least 6 characters, one upper case and lower case letter, and a special character
         variable: vmss_password
         required: true
-        default:
+        default: "{{ user_azure_password }}"
 
       - type: text
         question_name: Please, enter your desired username 
         variable: admin_username
         required: true
-        default:
+        default: "{{ user_azure_username }}"
 
       - type: password
         question_name: Please enter your desired admin password 
         question_description: The password must contain at least 6 characters, one upper case and lower case letter, and a special character
         variable: admin_password
         required: true
-        default:
+        default: "{{ user_azure_vmss_password }}"
 
       - type: text
         question_name: Please, enter your desired auto scale profile name 

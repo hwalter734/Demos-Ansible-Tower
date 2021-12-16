@@ -60,13 +60,13 @@ deploy_ec2:
         question_name: Please, enter your AWS account number 
         variable: aws_user_number_id 
         required: true
-        default:
+        default: "{{ aws_account_number_id }}"
 
       - type: text
         question_name: Please, enter your desired S3 bucket name 
         variable: s3_bucket_name 
         required: true
-        default:
+        default: "{{ aws_user_bucket }}"
         
   schema:
     - job_template: "{{ create.name }}"

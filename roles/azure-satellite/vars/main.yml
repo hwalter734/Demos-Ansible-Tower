@@ -335,7 +335,7 @@ workflow:
         question_name: Enter the SSH public key data 
         variable: key_data 
         required: true
-        default: 
+        default: "{{ ssh_public_key_data }}"
   schema:
     - job_template: "{{ create.name }}"
       success:
