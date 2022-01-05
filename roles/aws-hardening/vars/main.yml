@@ -72,7 +72,7 @@ deploy_ec2:
         question_name: Please, enter your AWS key name 
         variable: aws_key_name 
         required: true
-        default: "{{ aws_key_name }}"
+        default: "{{ aws_key_name | replace('\.*','') }}"
         
   schema:
     - job_template: "{{ create.name }}"
