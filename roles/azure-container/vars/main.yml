@@ -1,0 +1,121 @@
+---
+# vars file for roles/azure-scaleset
+create:
+  name: "Azure Container / Deploy Environment" 
+  description: "Azure Container / Deploy Environment" 
+  job_type: "run"
+  playbook: "setup_env.yml"
+delete_all:
+  name: "Azure Container / Delete all environment"
+  description: "Azure Container / Delete all environment"
+  job_type: "run"
+  playbook:  "remove_rg.yml"
+inventory: 
+  name: "Azure Container Development Environment" 
+  description: "Azure Container Development Environment" 
+  organization: "Default"
+  source:
+    name: "Azure Container Development Environment" 
+    description: "Azure Container Development Environment" 
+    source: "azure_rm"
+    update_on_launch: true
+    overwrite: true
+    overwrite_vars: true
+credential_azure: 
+  name: "Azure"
+  description: "Azure credentials"
+  organization: "Default"
+  credential_type: "azure_rm"
+  username: "{{ user_azure_username }}"
+  subscription: "{{ user_azure_subscription }}"
+  tenant: "{{ user_azure_tenant }}"
+  password: "{{ user_azure_password }}"
+credential: 
+  name: "Azure Credential"
+  description: "Azure machine credentials"
+  organization: "Default"
+  credential_type: "ssh"
+  username: "{{ azure_ssh_username }}"
+  private_key: "../../../{{ azure_private_key_file }}"
+project:
+  name: "Deploy Container on Azure" 
+  description: "Deploy Container on Azure" 
+  organization: "Default"
+  scm_type: git
+  scm_url:  "https://github.com/stuartatmicrosoft/Ansiblefest2019.git"
+workflow:
+  name: "Azure / Deploy Container Azure" 
+  description: "Azure / Deploy Container Azure" 
+  organization: "Default"
+  survey_enabled: true
+  survey_spec:
+    name: Azure Container survey 
+    description: Deploy a container on Azure 
+    spec:
+      - type: text
+        question_name: Please, enter the desired name of your resource group 
+        question_description: It should be a new group 
+        variable: resource_group
+        required: true
+        default: mycontainergroup
+        
+      - type: multiplechoice
+        question_name: Please enter the desired region to deploy your resources on 
+        question_description: Choose one
+        variable: location
+        required: true
+        default: eastus 
+        choices:
+          - eastus
+          - eastus2   
+          - westus
+          - centralus
+
+      - type: text
+        question_name: Please, enter the your docker username 
+        variable: docker_username 
+        required: true
+        default: "{{ docker_username }}" 
+
+      - type: password
+        question_name: Please, enter the your docker password
+        variable: docker_password
+        required: true
+        default: "{{ docker_password }}" 
+
+      - type: text
+        question_name: Please, enter the azure container registry name
+        variable: acr_name 
+        required: true
+        default: "{{ acr_name }}"
+
+      - type: text
+        question_name: Please, enter the aro client id 
+        variable: aro_client_id 
+        required: true
+        default: "{{ aro_client_id }}" 
+
+      - type: password 
+        question_name: Please, enter the aro secret 
+        variable: aro_secret 
+        required: true
+        default: "{{ aro_secret }}" 
+
+      - type: text
+        question_name: Please, enter the aro tenant id 
+        variable: aro_tenant_id
+        required: true
+        default: "{{ aro_tenant_id }}"
+
+      - type: password
+        question_name: Please, enter the aro key
+        variable: aro_key
+        required: true
+        default: "{{ aro_key }}"
+
+  schema:
+    - job_template: "{{ create.name }}"
+      success:
+        - inventory_source: "{{ inventory.name }}"
+          failure:
+            - job_template: "{{ delete_all.name }}"

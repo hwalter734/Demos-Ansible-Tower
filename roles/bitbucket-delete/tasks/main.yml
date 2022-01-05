@@ -1,0 +1,62 @@
+---
+# tasks file for roles/bibucket
+- name: Add Bitbucket credential 
+  tower_credential:
+    name: "{{ credential.name }}"
+    description: "{{ credential.description }}"
+    organization: "{{ credential.organization }}"
+    kind: "{{ credential.credential_type }}"
+    username: "{{ credential.username }}"
+    tower_username: "{{ my_tower_username }}"
+    tower_password: "{{ my_tower_password }}"
+    tower_host: "{{ my_tower_host }}"
+    validate_certs: false
+    state: absent
+
+- name: Add tower inventory
+  tower_inventory:
+    name: "{{ inventory.name }}"
+    description: "{{ inventory.description }}"
+    organization: "{{ inventory.organization }}"
+    tower_username: "{{ my_tower_username }}"
+    tower_password: "{{ my_tower_password }}"
+    tower_host: "{{ my_tower_host }}"
+    validate_certs: false
+    state: absent
+
+- name: add tower project
+  tower_project:
+    name: "{{ project.name }}"
+    description: "{{ project.description }}"
+    organization: "{{ project.organization }}"
+    scm_type: "{{ project.scm_type }}"
+    scm_url: "{{ project.scm_url }}"
+    tower_username: "{{ my_tower_username }}"
+    tower_password: "{{ my_tower_password }}"
+    tower_host: "{{ my_tower_host }}"
+    validate_certs: false
+    state: absent
+
+- name: add job template {{ create.name }} with survey
+  tower_job_template:
+    name: "{{ create.name }}"
+    description: "{{ create.description }}"
+    job_type: "{{ create.job_type }}"
+    become_enabled: "{{ create.become_enabled | default('false') }}"
+    inventory: "{{ inventory.name }}"
+    project: "{{ project.name }}"
+    playbook: "{{ create.playbook }}"
+    fact_caching_enabled: "{{ fact_caching_enabled | default('false') }}"
+    credential: "{{ credential.name }}"
+    survey_enabled: "{{ create.survey_enabled }}"
+    survey_spec: "{{ create.survey_spec }}"
+    tower_username: "{{ my_tower_username }}"
+    tower_password: "{{ my_tower_password }}"
+    tower_host: "{{ my_tower_host }}"
+    validate_certs: false
+  when:
+    - workshop_type in workshop_type
+  register: add_job_template
+  until: add_job_template is not failed
+  retries: 5
+    state: absent

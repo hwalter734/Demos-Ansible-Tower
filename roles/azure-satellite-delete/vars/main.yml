@@ -1,0 +1,348 @@
+---
+create:
+  name: "Azure Satellite / Deploy Environment"
+  description: "Azure Satellite / Deploy Environment"
+  job_type: "run"
+  playbook: "tower_deploy_satenv.yml"
+configure:
+  name: "Azure Satellite / Setup Volumes"
+  description: "Azure Satellite / Setup volumes"
+  job_type: "run"
+  playbook: "tower_setup_volumes.yml"
+setup:
+  name: "Azure Satellite / Setup Vagrant"
+  description: "Azure Satellite / Setup Vagrant"
+  job_type: "run"
+  playbook: "install_vagrant.yml"
+delete_all:
+  name: "Azure / Delete all environment"
+  description: "Azure / Delete all environment"
+  job_type: "run"
+  playbook: "tower_remove_rg.yml"
+inventory: 
+  name: "Azure Development environment"
+  description: "Azure Development environment"
+  organization: "Default"
+  source:
+    name: "Azure Development environment"
+    description: "Azure Development environment"
+    source: "azure_rm"
+    update_on_launch: false
+    overwrite: true
+    overwrite_vars: true
+credential_azure: 
+  name: "Azure"
+  description: "Azure credentials"
+  organization: "Default"
+  credential_type: "azure_rm"
+  username: "{{ user_azure_username }}"
+  subscription: "{{ user_azure_subscription }}"
+  tenant: "{{ user_azure_tenant }}"
+  password: "{{ user_azure_password }}"
+credential: 
+  name: "Azure Credential"
+  description: "Azure machine credentials"
+  organization: "Default"
+  credential_type: "ssh"
+  username: "{{ azure_ssh_username }}"
+  private_key: "../../../{{ azure_private_key_file }}"
+project:
+  name: "Deploy Satellite and Tower environment"
+  description:  "Deploy Satellite and Tower environment"
+  organization: "Default"
+  scm_type: git
+  scm_url: "https://github.com/hwalter734/GBM-Azure-SatEnv.git"
+workflow:
+  name: "Azure / Deploy Satellite and Tower environment"
+  description: "Azure / Deploy Satellite and Tower environment"
+  organization: "Default"
+  survey_enabled: true
+  survey_spec:
+    name: Azure satellite environment 
+    description: Provisioning a satellite environment in azure 
+    spec:
+      - type: text
+        question_name: Enter your desired resource group name 
+        question_description: It should be a new resource group, not an existing one 
+        variable: resource_group
+        required: true
+        default: rhelgroup 
+        
+      - type: multiplechoice
+        question_name: Enter your desired region to deploy the environment
+        question_description: Choose one 
+        variable: location
+        required: true
+        default: eastus 
+        choices:
+          - eastus
+          - eastus2   
+          - westus
+          - centralus
+
+      - type: text
+        question_name: Enter the desired ip address for your virtual network 
+        question_description: Make sure its a valid ip address 
+        variable: vn_address
+        required: true
+        default: "10.1.0.0/16" 
+
+      - type: text
+        question_name: Enter the desired ip address of your satellite instance 
+        question_description: Make sure its a valid ip address 
+        variable: sat_address 
+        required: true
+        default: "10.1.1.0/24" 
+
+      - type: text
+        question_name: Enter the desired ip address of your capsule instance 
+        question_description: Make sure its a valid ip address 
+        variable: cap_address 
+        required: true
+        default: "10.1.2.0/24" 
+
+      - type: text
+        question_name: Enter the desired name for the security group of the satellite instance 
+        variable: sat_sg_name 
+        required: true
+        default: "satsg1"
+
+      - type: text
+        question_name: Enter the name of the rule associated with inbound TCP ports for the satellite instance 
+        variable: sat_intcp_name 
+        required: true
+        default: "AllowISTCP" 
+
+      - type: multiselect 
+        question_name: Please, enter your desired VM size 
+        variable: sat_intcp_ports 
+        required: true
+        default: "443\n80\n5646\n5647\n8000\n8140\n9090\n7\n53\n5000\n22" 
+        choices:
+          - "443" 
+          - "80" 
+          - "5646" 
+          - "5647" 
+          - "8000" 
+          - "8140" 
+          - "9090" 
+          - "7" 
+          - "53" 
+          - "5000" 
+          - "22" 
+
+      - type: text
+        question_name: Enter the name of the rule associated with inbound UDP ports for the satellite instance 
+        variable: sat_inudp_name
+        required: true
+        default: "AllowISUDP" 
+
+      - type: multiselect
+        question_name: Enter the ingress udp ports for the satellite instance 
+        variable: sat_inudp_ports 
+        required: true
+        default: "7\n53\n67\n69" 
+        choices:
+          - "7" 
+          - "53" 
+          - "67" 
+          - "69" 
+
+      - type: text
+        question_name: Enter the name of the rule associated with outbound TCP ports for the satellite instance 
+        variable: sat_egtcp_name
+        required: true
+        default: "AllowESTCP" 
+
+      - type: multiselect 
+        question_name: Enter the TCP outbound ports for the satellite instance 
+        variable: sat_egtcp_ports
+        required: true
+        default: "443\n9090\n80"
+        choices:
+          - "443"
+          - "9090"
+          - "80"
+
+      - type: text
+        question_name: Enter the desired name of the security group of the capsule instance 
+        variable: cap_sg_name 
+        required: true
+        default: "capsg1" 
+
+      - type: text
+        question_name: Enter the name of the rule associated with inbound TCP ports for the capsule instance 
+        variable: cap_intcp_name 
+        required: true
+        default: "AllowICTCP" 
+
+      - type: multiselect 
+        question_name: Enter the TCP inbound ports for the capsule instance 
+        variable: cap_intcp_ports
+        required: true
+        default: "5646\n80\n443\n5647\n8000\n8140\n8443\n9090\n53\n22\n5000"
+        choices:
+          - "5646"
+          - "80"
+          - "443"
+          - "5647"
+          - "8000"
+          - "8140"
+          - "8443"
+          - "9090"
+          - "53"
+          - "22"
+          - "5000"
+
+      - type: text
+        question_name: Enter the name of the rule associated with outbound TCP ports for the capsule instance 
+        variable: cap_egtcp_name
+        required: true
+        default: "AllowECTCP" 
+
+      - type: multiselect 
+        question_name: Enter the TCP outbound ports for the capsule instance 
+        variable: cap_egtcp_ports
+        required: true
+        default: "7\n8443" 
+        choices:
+          - "7"
+          - "8443"
+
+      - type: text
+        question_name: Enter the name of the rule associated with inbound UDP ports for the capsule instance 
+        variable: cap_inudp_name
+        required: true
+        default: "AllowICUDP" 
+
+      - type: multiselect
+        question_name: Enter the UDP inbound ports for the capsule instance 
+        variable: cap_inudp_ports
+        required: true
+        default: "53\n67\n69"
+        choices:
+          - "53"
+          - "67"
+          - "69"
+
+      - type: text
+        question_name: Enter the name of the rule associated with outbound UDP ports for the capsule instance 
+        variable: cap_egudp_name
+        required: true
+        default: "AllowECUDP" 
+
+      - type: multiselect
+        question_name: Enter the UDP outbound ports for the capsule instance 
+        variable: cap_egudp_ports
+        required: true
+        default: "68"
+        choices:
+          - "68"
+
+      - type: text
+        question_name: Enter the desired name of the virtual network 
+        variable: vn_name 
+        required: true
+        default: "mynetwork"
+
+      - type: text
+        question_name: Enter the desired name of the satellite subnet 
+        variable: sat_subnet_name
+        required: true
+        default: "sat_subnet_name"
+
+      - type: text
+        question_name: Enter the desired name of the capsule subnet 
+        variable: cap_subnet_name
+        required: true
+        default: "cap_subnet_name"
+
+      - type: text
+        question_name: Enter the desired name of the load balancer 
+        variable: lb_name 
+        required: true
+        default: "mylb"
+
+      - type: text
+        question_name: Enter the desired name of the load balancer 
+        variable: public_ip_name
+        required: true
+        default: "rhelgroupip"
+
+      - type: text
+        question_name: Enter the desired ip name of the satellite instance 
+        variable: sat_ip_name
+        required: true
+        default: "sat_ip" 
+
+      - type: text
+        question_name: Enter the desired ip name of the capsule instance 
+        variable: cap_ip_name
+        required: true
+        default: "cap_ip" 
+
+      - type: text
+        question_name: Enter the NIC name of the satellite instance 
+        variable: sat_nic_name 
+        required: true
+        default: "sat_nic" 
+
+      - type: text
+        question_name: Enter the NIC name of the capsule instance 
+        variable: cap_nic_name 
+        required: true
+        default: "cap_nic" 
+
+      - type: text
+        question_name: Enter the name of the satellite instance 
+        variable: sat_instance_name
+        required: true
+        default: "satserver" 
+
+      - type: text
+        question_name: Enter the size of the satellite instance 
+        question_description: "It needs to be a Standard_D8s_v4 instance or bigger"
+        variable: sat_instance_size
+        required: true
+        default: "Standard_D8s_v4" 
+
+      - type: text
+        question_name: Enter the name of the capsule instance 
+        variable: cap_instance_name
+        required: true
+        default: "capserver" 
+
+      - type: text
+        question_name: Enter the size of the capsule instance 
+        question_description: "It needs to be a Standard_D4s_v4 instance or bigger"
+        variable: cap_instance_size
+        required: true
+        default: "Standard_D4s_v4" 
+
+      - type: text
+        question_name: Enter the admin username of all instances 
+        variable: admin_username 
+        required: true
+        default: "johndoe" 
+
+      - type: text
+        question_name: Enter the desired storage size for both instances 
+        variable: storage_size 
+        required: true
+        default: "500" 
+
+      - type: password
+        question_name: Enter the SSH public key data 
+        variable: key_data 
+        required: true
+        default: "{{ ssh_public_key_data }}"
+  schema:
+    - job_template: "{{ create.name }}"
+      success:
+        - inventory_source: "{{ inventory.name }}"
+          success:
+          - job_template: "{{ configure.name }}"
+            failure:
+              - job_template: "{{ delete_all.name }}"
+            #            success:
+            #  - job_template: "{{ setup.name }}"

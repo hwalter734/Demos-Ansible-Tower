@@ -1,0 +1,186 @@
+---
+# vars file for roles/azure-scaleset
+create:
+  name: "Azure Autoscale / Deploy Environment"
+  description: "Azure Autoscale / Deploy Environment"
+  job_type: "run"
+  playbook: "setup_env.yml"
+delete_all:
+  name: "Azure Autoscale / Delete all environment"
+  description: "Azure Autoscale / Delete all environment"
+  job_type: "run"
+  playbook:  "remove_rg.yml"
+inventory: 
+  name: "Azure Autoscale Development environment"
+  description: "Azure Autoscale Development environment"
+  organization: "Default"
+  source:
+    name: "Azure Autoscale Development environment"
+    description: "Azure Autoscale Development environment"
+    source: "azure_rm"
+    update_on_launch: true
+    overwrite: true
+    overwrite_vars: true
+credential_azure: 
+  name: "Azure"
+  description: "Azure credentials"
+  organization: "Default"
+  credential_type: "azure_rm"
+  username: "{{ user_azure_username }}"
+  subscription: "{{ user_azure_subscription }}"
+  tenant: "{{ user_azure_tenant }}"
+  password: "{{ user_azure_password }}"
+credential: 
+  name: "Azure Credential"
+  description: "Azure machine credentials"
+  organization: "Default"
+  credential_type: "ssh"
+  username: "{{ azure_ssh_username }}"
+  private_key: "../../../{{ azure_private_key_file }}"
+project:
+  name: "Deploy Autoscale Set on Azure"
+  description:  "Deploy Autoscale Set on Azure"
+  organization: "Default"
+  scm_type: git
+  scm_url: "https://github.com/hwalter734/GBM-Ansible-Tower-Azure-Demo.git"
+workflow:
+  name: "Azure / Deploy Autoscale Set"
+  description: "Azure / Deploy Autoscale Set"
+  organization: "Default"
+  survey_enabled: true
+  survey_spec:
+    name: Azure vm autoscale set survey 
+    description: Provisioning a autoscale set in Azure
+    spec:
+      - type: text
+        question_name: Please, enter the desired name of your resource group 
+        question_description: It should be a new group 
+        variable: resource_group
+        required: true
+        default: myubuntugroup
+        
+      - type: multiplechoice
+        question_name: Please enter the desired region to deploy your resources on 
+        question_description: Choose one
+        variable: location
+        required: true
+        default: eastus 
+        choices:
+          - eastus
+          - eastus2   
+          - westus
+          - centralus
+
+      - type: text
+        question_name: Please, enter the ip address of your virtual network 
+        question_description: Make sure its a valid ip address 
+        variable: vn_address_var 
+        required: true
+        default: "10.1.0.0/16" 
+
+      - type: text
+        question_name: Please, enter the name of your virtual network 
+        variable: vmss_name_network
+        required: true
+        default: "myvn"
+
+      - type: text
+        question_name: Please, enter the ip address of your subnet 
+        question_description: Make sure its a valid ip address 
+        variable: subnet_address_var 
+        required: true
+        default: "10.1.0.0/24" 
+
+      - type: text
+        question_name: Please, enter the name of your load balancer 
+        variable: vmss_name_lb
+        required: true
+        default: mylb 
+
+      - type: text
+        question_name: Please, enter the name of your virtual machine scale set 
+        variable: vmss_name
+        required: true
+        default: myvmss
+
+      - type: password
+        question_name: Please enter your desired VM Scale Set password  
+        question_description: The password must contain at least 6 characters, one upper case and lower case letter, and a special character
+        variable: vmss_password
+        required: true
+        default: "{{ user_azure_password }}"
+
+      - type: text
+        question_name: Please, enter your desired username 
+        variable: admin_username
+        required: true
+        default: "{{ azure_ssh_username }}"
+
+      - type: password
+        question_name: Please enter your desired admin password 
+        question_description: The password must contain at least 6 characters, one upper case and lower case letter, and a special character
+        variable: admin_password
+        required: true
+        default: "{{ azure_ssh_password }}"
+
+      - type: text
+        question_name: Please, enter your desired auto scale profile name 
+        variable: cpuscalesetting 
+        required: true
+        default: cpuscalesetting 
+
+      - type: multiplechoice
+        question_name: Please, enter your desired VM size 
+        variable: vm_size_option
+        required: true
+        default: "Standard_DS1_v2" 
+        choices:
+          - "Standard_DS1_v2"
+          - "B1s"
+          - "A0 Basic"
+          - "A0 Standard" 
+
+      - type: multiplechoice 
+        question_name: Please, enter the desired number of VMs in the scale set 
+        variable: vm_capacity 
+        required: true
+        default: "2"
+        choices:
+          - "2"
+          - "3"
+          - "4"
+          - "5"
+
+      - type: multiplechoice 
+        question_name: Please, enter the type of upgrade policy you want to use
+        question_description: "Manual: When making a change to the scale set, the user needs to apply manually all changes to each virtual machine of the scale set. Automatic: All changes made in the scale set will automatically apply to all virtual machines and will reboot"
+        variable: policy_var 
+        required: true
+        default: Automatic
+        choices:
+          - Automatic
+          - Manual
+
+      - type: multiplechoice 
+        question_name: Please, enter the SKU/version of Ubuntu you want to use 
+        variable: sku_var
+        required: true
+        default: "16.04-LTS" 
+        choices:
+          - "16.04-LTS"
+          - "20.04-LTS"
+          - "20.10"
+
+      - type: integer
+        question_name: Please, enter the threshold desired for the CPU's of the VM Scaleset 
+        variable: threshold_var 
+        required: true
+        default: 50 
+
+
+  schema:
+    - job_template: "{{ create.name }}"
+      success:
+        - inventory_source: "{{ inventory.name }}"
+          failure:
+            - job_template: "{{ delete_all.name }}"

@@ -1,0 +1,93 @@
+---
+# tasks file for roles/azure-scaleset
+- name: Add Azure tower credential
+  tower_credential:
+    name: "{{ credential_azure.name }}"
+    description: "{{ credential_azure.description }}"
+    organization: "{{ credential_azure.organization }}"
+    kind: "{{ credential_azure.credential_type }}"
+    subscription: "{{ credential_azure.subscription }}"
+    tenant: "{{ credential_azure.tenant }}"
+    tower_username: "{{ my_tower_username }}"
+    tower_password: "{{ my_tower_password }}"
+    tower_host: "{{ my_tower_host }}"
+    validate_certs: false
+    state: absent
+
+- name: Add Azure machine credential
+  tower_credential:
+    name: "{{ credential.name }}"
+    description: "{{ credential.description }}"
+    organization: "{{ credential.organization }}"
+    kind: "{{ credential.credential_type }}"
+    username: "{{ credential.username }}"
+    ssh_key_data: "{{ lookup('file', credential.private_key) }}"
+    tower_username: "{{ my_tower_username }}"
+    tower_password: "{{ my_tower_password }}"
+    tower_host: "{{ my_tower_host }}"
+    validate_certs: false
+    state: absent
+
+- name: Add tower inventory
+  tower_inventory:
+    name: "{{ inventory.name }}"
+    description: "{{ inventory.description }}"
+    organization: "{{ inventory.organization }}"
+    tower_username: "{{ my_tower_username }}"
+    tower_password: "{{ my_tower_password }}"
+    tower_host: "{{ my_tower_host }}"
+    validate_certs: false
+    state: absent
+
+- name: Add tower inventory source
+  tower_inventory_source:
+    name: "{{ inventory.source.name }}"
+    description: "{{ inventory.source.description }}"
+    inventory: "{{ inventory.name }}"
+    credential: "{{ credential_azure.name }}"
+    source: "{{ inventory.source.source }}"
+    update_on_launch: "{{ inventory.source.update_on_launch }}"
+    overwrite: "{{ inventory.source.overwrite }}"
+    overwrite_vars: "{{ inventory.source.overwrite }}"
+    tower_username: "{{ my_tower_username }}"
+    tower_password: "{{ my_tower_password }}"
+    tower_host: "{{ my_tower_host }}"
+    validate_certs: false
+    state: absent
+
+- name: add tower project
+  tower_project:
+    name: "{{ project.name }}"
+    description: "{{ project.description }}"
+    organization: "{{ project.organization }}"
+    scm_type: "{{ project.scm_type }}"
+    scm_url: "{{ project.scm_url }}"
+    tower_username: "{{ my_tower_username }}"
+    tower_password: "{{ my_tower_password }}"
+    tower_host: "{{ my_tower_host }}"
+    validate_certs: false
+    state: absent
+
+- name: add job template {{ create.name }} with survey
+  tower_job_template:
+    name: "{{ create.name }}"
+    description: "{{ create.description }}"
+    job_type: "{{ create.job_type }}"
+    become_enabled: "{{ create.become_enabled | default('false') }}"
+    inventory: "{{ inventory.name }}"
+    project: "{{ project.name }}"
+    playbook: "{{ create.playbook }}"
+    fact_caching_enabled: "{{ fact_caching_enabled | default('false') }}"
+    credential: "{{ credential_azure.name }}"
+    survey_enabled: "{{ workflow.survey_enabled }}"
+    survey_spec: "{{ workflow.survey_spec }}"
+    tower_username: "{{ my_tower_username }}"
+    tower_password: "{{ my_tower_password }}"
+    tower_host: "{{ my_tower_host }}"
+    validate_certs: false
+  when:
+    - workshop_type in workshop_type
+  register: add_job_template
+  until: add_job_template is not failed
+  retries: 5
+    state: absent

@@ -1,0 +1,76 @@
+---
+# vars file for roles/azure-scaleset
+name: "AWS Hardening/ Deploy Environment"
+description: "AWSHardening / Deploy Environment"
+job_type: "run"
+become_enabled: true
+playbook: "main_part_1.yml"
+create:
+  name: "AWS Hardening/ Deploy Environment"
+  description: "AWS Hardening / Deploy Environment"
+  job_type: "run"
+  playbook: "main_part_1.yml"
+delete_all:
+  name: "AWS Hardening / Delete environment"
+  description: "AWS Hardening / Delete environment"
+  job_type: "run"
+  playbook:  "remove_rg.yml"
+inventory: 
+  name: "AWS Hardening Development environment"
+  description: "AWS Hardening Development environment"
+  organization: "Default"
+  source:
+    name: "AWS Hardening Development environment"
+    description: "AWS Hardening Development environment"
+    source: "ec2"
+    update_on_launch: true
+    overwrite: true
+    overwrite_vars: true
+credential_aws: 
+  name: "AWS"
+  description: "AWS credentials"
+  organization: "Default"
+  credential_type: "aws"
+  access_key: "{{ my_aws_access_key }}"
+  secret_key: "{{ my_aws_secret_key }}"
+credential: 
+  name: "AWS Credential"
+  description: "AWS machine credentials"
+  organization: "Default"
+  credential_type: "ssh"
+  username: "ec2-user"
+  private_key: "../../../{{ aws_key_name }}"
+project:
+  name: "Deploy Hardened AWS Instance"
+  description: "Deploy Hardened AWS Instance"
+  organization: "Default"
+  scm_type: git
+  scm_url: "https://github.com/hwalter734/GBM-Ansible-AWS-Hardening.git"
+deploy_ec2:
+  name: "AWS / Deploy Hardened Instance"
+  description: "AWS / Deploy Hardened Instance"
+  organization: "Default"
+  playbook: "main_part_1.yml"
+  survey_enabled: true
+  survey_spec:
+    name: AWS Hardened Instance survey 
+    description: Provisioning a AWS hardened instance
+    spec:
+      - type: text
+        question_name: Please, enter your AWS account number 
+        variable: aws_user_number_id 
+        required: true
+        default: "{{ aws_account_number_id }}"
+
+      - type: text
+        question_name: Please, enter your desired S3 bucket name 
+        variable: s3_bucket_name 
+        required: true
+        default: "{{ aws_user_bucket }}"
+        
+  schema:
+    - job_template: "{{ create.name }}"
+      success:
+        - inventory_source: "{{ inventory.name }}"
+          failure:
+            - job_template: "{{ delete_all.name }}"
