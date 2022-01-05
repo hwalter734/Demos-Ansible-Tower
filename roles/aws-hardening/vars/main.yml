@@ -67,6 +67,12 @@ deploy_ec2:
         variable: s3_bucket_name 
         required: true
         default: "{{ aws_user_bucket }}"
+
+      - type: text
+        question_name: Please, enter your AWS key name 
+        variable: aws_key_name 
+        required: true
+        default: "{{ aws_key_name }}"
         
   schema:
     - job_template: "{{ create.name }}"
