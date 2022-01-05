@@ -5,9 +5,8 @@
     name: "{{ credential.name }}"
     description: "{{ credential.description }}"
     organization: "{{ credential.organization }}"
-    credential_type: "{{ credential.credential_type }}"
-    inputs:
-      username: "{{ credential.username }}"
+    kind: "{{ credential.credential_type }}"
+    username: "{{ credential.username }}"
     tower_username: "{{ my_tower_username }}"
     tower_password: "{{ my_tower_password }}"
     tower_host: "{{ my_tower_host }}"
